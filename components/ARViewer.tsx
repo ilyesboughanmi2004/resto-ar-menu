@@ -109,14 +109,17 @@ export default function ARViewer({ modelUrl, onClose }: ARViewerProps) {
       setLoadProgress(Math.round(progress));
     };
 
-    const handleError = () => {
+    const handleError = (e: any) => {
       setIsLoading(false);
-      setError('Failed to load 3D model. Please check the file path.');
+      const errorMessage = e?.detail?.message || e?.message || 'Failed to load 3D model.';
+      setError(`Error: ${errorMessage}. Path: ${modelUrlFinal}`);
+      console.error('Model loading error:', e);
     };
 
     modelViewer.addEventListener('load', handleLoad);
     modelViewer.addEventListener('progress', handleProgress);
     modelViewer.addEventListener('error', handleError);
+    modelViewer.addEventListener('model-error', handleError);
 
     return () => {
       modelViewer.removeEventListener('load', handleLoad);
