@@ -149,8 +149,10 @@ async function main() {
     },
   ]
 
-  // Sketchfab model ID for towels_reality_scan_test.glb
-  const sketchfabModelId = 'c6b7ee9ff9844eebb8922538cb76e40e'
+  // GLB file path - place your GLB file in public/models/
+  // Example: public/models/towels_reality_scan_test.glb
+  // The arModelUrl should be the path to your GLB file
+  const glbFilePath = '/models/towels_reality_scan_test.glb'
 
   for (const item of menuItems) {
     await prisma.menuItem.create({
@@ -159,7 +161,7 @@ async function main() {
         categoryId: drinksCategory.id,
         restaurantId: restaurant.id,
         imageUrl: null,
-        arModelUrl: sketchfabModelId, // All items use the same 3D model for testing
+        arModelUrl: glbFilePath, // All items use the same 3D model for testing
       },
     })
     console.log(`✅ Created menu item: ${item.name}`)
