@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface ARViewerProps {
   modelUrl: string;
@@ -31,6 +31,9 @@ declare global {
 
 export default function ARViewer({ modelUrl, onClose }: ARViewerProps) {
   const modelViewerRef = useRef<HTMLElement>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadProgress, setLoadProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Prevent body scroll when modal is open
@@ -82,6 +85,44 @@ export default function ARViewer({ modelUrl, onClose }: ARViewerProps) {
     ? modelUrlFinal.replace('.gltf', '.usdz')
     : `${modelUrlFinal}.usdz`;
 
+  useEffect(() => {
+    // Reset loading state when model URL changes
+    setIsLoading(true);
+    setLoadProgress(0);
+    setError(null);
+  }, [modelUrlFinal]);
+
+  useEffect(() => {
+    // Listen for model-viewer events
+    const modelViewer = modelViewerRef.current as any;
+    if (!modelViewer) return;
+
+    const handleLoad = () => {
+      setIsLoading(false);
+      setLoadProgress(100);
+    };
+
+    const handleProgress = (e: any) => {
+      const progress = e.detail.totalProgress * 100;
+      setLoadProgress(Math.round(progress));
+    };
+
+    const handleError = () => {
+      setIsLoading(false);
+      setError('Failed to load 3D model. Please check the file path.');
+    };
+
+    modelViewer.addEventListener('load', handleLoad);
+    modelViewer.addEventListener('progress', handleProgress);
+    modelViewer.addEventListener('error', handleError);
+
+    return () => {
+      modelViewer.removeEventListener('load', handleLoad);
+      modelViewer.removeEventListener('progress', handleProgress);
+      modelViewer.removeEventListener('error', handleError);
+    };
+  }, []);
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75"
@@ -130,17 +171,44 @@ export default function ARViewer({ modelUrl, onClose }: ARViewerProps) {
           shadow-intensity="1"
           exposure="1"
           environment-image="neutral"
+          loading="eager"
+          reveal="interaction"
         >
-          {/* Loading indicator */}
-          <div
-            slot="poster"
-            className="w-full h-full flex items-center justify-center bg-gray-100"
-          >
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading 3D model...</p>
+          {/* Loading indicator with progress */}
+          {(isLoading || error) && (
+            <div
+              slot="poster"
+              className="w-full h-full flex items-center justify-center bg-gray-100"
+            >
+              <div className="text-center">
+                {error ? (
+                  <>
+                    <div className="text-red-500 text-4xl mb-4">⚠️</div>
+                    <p className="text-red-600 font-semibold mb-2">Error Loading Model</p>
+                    <p className="text-gray-600 text-sm mb-4">{error}</p>
+                    <p className="text-gray-500 text-xs">Path: {modelUrlFinal}</p>
+                  </>
+                ) : (
+                  <>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="text-gray-600 font-medium mb-2">Loading 3D model...</p>
+                    {loadProgress > 0 && (
+                      <div className="w-48 bg-gray-200 rounded-full h-2 mx-auto mb-2">
+                        <div
+                          className="bg-primary h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${loadProgress}%` }}
+                        ></div>
+                      </div>
+                    )}
+                    <p className="text-gray-500 text-xs">{loadProgress}%</p>
+                    {loadProgress === 0 && (
+                      <p className="text-gray-400 text-xs mt-2">This may take a moment for large files...</p>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </model-viewer>
 
         {/* AR Button Info */}
