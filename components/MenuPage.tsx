@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Restaurant, Category, MenuItem } from '@prisma/client';
 import ARViewer from './ARViewer';
 
@@ -32,10 +33,13 @@ export default function MenuPage({ restaurant }: MenuPageProps) {
       <header className="bg-white shadow-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           {restaurant.logoUrl && (
-            <img
+            <Image
               src={restaurant.logoUrl}
               alt={restaurant.name}
+              width={120}
+              height={48}
               className="h-12 w-auto mx-auto mb-2"
+              unoptimized
             />
           )}
           <h1 className="text-2xl font-bold text-center text-shadow">
@@ -104,10 +108,12 @@ export default function MenuPage({ restaurant }: MenuPageProps) {
                   {/* Right side - Image and AR button */}
                   <div className="relative sm:w-48 w-full h-48 sm:h-auto flex-shrink-0">
                     {item.imageUrl ? (
-                      <img
+                      <Image
                         src={item.imageUrl}
                         alt={item.name}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
+                        unoptimized
                       />
                     ) : (
                       <div className="w-full h-full bg-gray-200 flex items-center justify-center">

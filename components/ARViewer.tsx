@@ -67,14 +67,16 @@ export default function ARViewer({ modelUrl, onClose }: ARViewerProps) {
           className="w-full h-full rounded-lg"
           frameBorder="0"
           allowFullScreen
-          mozAllowFullScreen={true}
-          webkitAllowFullScreen={true}
           allow="autoplay; fullscreen; xr-spatial-tracking"
-          xr-spatial-tracking
-          execution-while-out-of-viewport
-          execution-while-not-rendered
-          web-share
           src={`https://sketchfab.com/models/${modelId}/embed`}
+          {...({
+            'mozallowfullscreen': 'true',
+            'webkitallowfullscreen': 'true',
+            'xr-spatial-tracking': 'true',
+            'execution-while-out-of-viewport': 'true',
+            'execution-while-not-rendered': 'true',
+            'web-share': 'true',
+          } as React.HTMLAttributes<HTMLIFrameElement>)}
         />
       </div>
     </div>
