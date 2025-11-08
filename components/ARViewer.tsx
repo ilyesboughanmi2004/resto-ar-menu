@@ -22,6 +22,8 @@ declare global {
           'shadow-intensity'?: string;
           exposure?: string;
           'environment-image'?: string;
+          loading?: string;
+          reveal?: string;
         },
         HTMLElement
       >;
