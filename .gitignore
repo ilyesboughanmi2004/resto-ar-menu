@@ -39,6 +39,10 @@ next-env.d.ts
 /prisma/migrations
 
 # 3D model files (large binary files)
+# But allow files in public/models/ for deployment
 *.glb
 *.gltf
+!public/models/*.glb
+!public/models/*.gltf
+!public/models/*.usdz
 
