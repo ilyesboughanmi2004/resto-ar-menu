@@ -14,14 +14,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <script
+      <body>
+        <Script
           type="module"
           src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js"
-          async
+          strategy="beforeInteractive"
         />
-      </head>
-      <body>{children}</body>
+        {children}
+      </body>
     </html>
   );
 }

@@ -95,38 +95,65 @@ export default function ARViewer({ modelUrl, onClose }: ARViewerProps) {
   }, [modelUrlFinal]);
 
   useEffect(() => {
-    // Listen for model-viewer events
-    const modelViewer = modelViewerRef.current as any;
-    if (!modelViewer) return;
+    // Check if model-viewer is loaded
+    const checkAndSetup = () => {
+      if (typeof window === 'undefined') return;
+      
+      const modelViewer = modelViewerRef.current as any;
+      if (!modelViewer) {
+        setTimeout(checkAndSetup, 100);
+        return;
+      }
 
-    const handleLoad = () => {
-      setIsLoading(false);
-      setLoadProgress(100);
+      // Check if custom element is defined
+      if (!customElements.get('model-viewer')) {
+        console.warn('model-viewer custom element not found, retrying...');
+        setTimeout(checkAndSetup, 200);
+        return;
+      }
+
+      console.log('Setting up model-viewer with URL:', modelUrlFinal);
+
+      const handleLoad = () => {
+        console.log('Model loaded successfully');
+        setIsLoading(false);
+        setLoadProgress(100);
+      };
+
+      const handleProgress = (e: any) => {
+        const progress = e.detail?.totalProgress ? e.detail.totalProgress * 100 : 0;
+        setLoadProgress(Math.round(progress));
+        console.log('Loading progress:', Math.round(progress) + '%');
+      };
+
+      const handleError = (e: any) => {
+        console.error('Model loading error:', e);
+        setIsLoading(false);
+        const errorMessage = e?.detail?.message || e?.message || 'Failed to load 3D model.';
+        setError(`Error: ${errorMessage}. Path: ${modelUrlFinal}`);
+      };
+
+      modelViewer.addEventListener('load', handleLoad);
+      modelViewer.addEventListener('progress', handleProgress);
+      modelViewer.addEventListener('error', handleError);
+      modelViewer.addEventListener('model-error', handleError);
+
+      // Force reload if src is set
+      if (modelViewer.src !== modelUrlFinal) {
+        modelViewer.src = modelUrlFinal;
+      }
+
+      return () => {
+        modelViewer.removeEventListener('load', handleLoad);
+        modelViewer.removeEventListener('progress', handleProgress);
+        modelViewer.removeEventListener('error', handleError);
+        modelViewer.removeEventListener('model-error', handleError);
+      };
     };
 
-    const handleProgress = (e: any) => {
-      const progress = e.detail.totalProgress * 100;
-      setLoadProgress(Math.round(progress));
-    };
-
-    const handleError = (e: any) => {
-      setIsLoading(false);
-      const errorMessage = e?.detail?.message || e?.message || 'Failed to load 3D model.';
-      setError(`Error: ${errorMessage}. Path: ${modelUrlFinal}`);
-      console.error('Model loading error:', e);
-    };
-
-    modelViewer.addEventListener('load', handleLoad);
-    modelViewer.addEventListener('progress', handleProgress);
-    modelViewer.addEventListener('error', handleError);
-    modelViewer.addEventListener('model-error', handleError);
-
-    return () => {
-      modelViewer.removeEventListener('load', handleLoad);
-      modelViewer.removeEventListener('progress', handleProgress);
-      modelViewer.removeEventListener('error', handleError);
-    };
-  }, []);
+    const timeout = setTimeout(checkAndSetup, 100);
+    return () => clearTimeout(timeout);
+  }, [modelUrlFinal]);
 
   return (
     <div
@@ -170,14 +197,17 @@ export default function ARViewer({ modelUrl, onClose }: ARViewerProps) {
           style={{
             width: '100%',
             height: '100%',
-            backgroundColor: '#fff',
+            backgroundColor: '#f0f0f0',
+            minHeight: '400px',
           }}
           ios-src={iosModelUrl}
           shadow-intensity="1"
           exposure="1"
           environment-image="neutral"
           loading="eager"
-          reveal="interaction"
+          reveal="auto"
+          auto-rotate
+          interaction-policy="allow-when-focused"
         >
           {/* Loading indicator with progress */}
           {(isLoading || error) && (
