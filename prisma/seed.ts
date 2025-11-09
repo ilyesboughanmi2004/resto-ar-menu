@@ -11,8 +11,8 @@ async function main() {
   if (!restaurant) {
     restaurant = await prisma.restaurant.create({
       data: {
-        name: 'Your Coffee Shop',
-        description: 'A cozy coffee shop serving delicious beverages and treats',
+        name: 'Your Restaurant',
+        description: 'A modern fast food restaurant serving delicious meals',
         logoUrl: null,
         qrCodeUrl: null,
       },
@@ -22,153 +22,318 @@ async function main() {
     console.log('✅ Using existing restaurant:', restaurant.name)
   }
 
-  // Create or get Drinks category
-  let drinksCategory = await prisma.category.findFirst({
-    where: {
-      restaurantId: restaurant.id,
-      name: 'Drinks',
-    },
-  })
+  // GLB file paths for AR models
+  const defaultGlbFilePath = '/models/towels_reality_scan_test.glb'
+  const pizzaGlbFilePath = '/models/pizza.glb'
 
-  if (!drinksCategory) {
-    drinksCategory = await prisma.category.create({
-      data: {
-        name: 'Drinks',
-        restaurantId: restaurant.id,
-        order: 1,
-      },
-    })
-    console.log('✅ Created category: Drinks')
-  } else {
-    console.log('✅ Using existing category: Drinks')
-    // Delete existing menu items in Drinks category to avoid duplicates
-    const deletedCount = await prisma.menuItem.deleteMany({
-      where: {
-        categoryId: drinksCategory.id,
-      },
-    })
-    if (deletedCount.count > 0) {
-      console.log(`🗑️  Deleted ${deletedCount.count} existing menu items`)
-    }
-  }
-
-  // Create menu items
-  const menuItems = [
-    // Water
+  // Define all categories and their menu items (extracted from Elfsight Fast Food Restaurant example)
+  const categoriesData = [
     {
-      name: 'Sparkling Water',
-      description: 'Refreshing carbonated water',
-      price: 2.50,
+      name: 'Pizza',
       order: 1,
+      items: [
+        {
+          name: 'La Rossa',
+          description: 'Tomato sauce, garlic, basil (no cheese)',
+          price: 15.00,
+          order: 1,
+          imageUrl: '/images/la-rossa.jpg',
+          arModelUrl: pizzaGlbFilePath,
+        },
+        {
+          name: 'Margherita',
+          description: 'Tomato sauce, fresh mozzarella, basil, sea salt, California extra virgin olive oil',
+          price: 17.00,
+          order: 2,
+          imageUrl: '/images/margherita.jpg',
+          arModelUrl: pizzaGlbFilePath,
+        },
+        {
+          name: 'Burrata',
+          description: 'Tomato Sauce, burrata, garlic, basil',
+          price: 18.00,
+          order: 3,
+          imageUrl: '/images/burrata.jpg',
+          arModelUrl: pizzaGlbFilePath,
+        },
+        {
+          name: 'Jersey Margherita',
+          description: 'Crushed NJ tomatoes, Jersey Girl mozzarella, basil',
+          price: 19.00,
+          order: 4,
+          imageUrl: '/images/jersey-margherita.jpg',
+          arModelUrl: pizzaGlbFilePath,
+        },
+        {
+          name: 'Panna',
+          description: 'Tomato sauce, fresh mozzarella, grass-fed PA cow\'s cream, arugula, parmigiano',
+          price: 18.00,
+          order: 5,
+          imageUrl: '/images/panna.jpg',
+          arModelUrl: pizzaGlbFilePath,
+        },
+        {
+          name: 'Bosco',
+          description: 'Tomato sauce, fresh mozzarella, cremini mushrooms, fontina',
+          price: 17.00,
+          order: 6,
+          imageUrl: '/images/bosco.jpg',
+          arModelUrl: pizzaGlbFilePath,
+        },
+        {
+          name: 'Pepperoni',
+          description: 'Tomato sauce, fresh mozzarella, pepperoni',
+          price: 19.00,
+          order: 7,
+          imageUrl: '/images/pepperoni.jpg',
+          arModelUrl: pizzaGlbFilePath,
+        },
+        {
+          name: 'Guancia',
+          description: 'Tomato sauce, fresh mozzarella, guanciale, shaved onion, pecorino',
+          price: 19.00,
+          order: 8,
+          imageUrl: '/images/guancia.jpg',
+          arModelUrl: pizzaGlbFilePath,
+        },
+      ],
     },
     {
-      name: 'Still Water',
-      description: 'Pure filtered water',
-      price: 2.00,
+      name: 'Burgers',
       order: 2,
+      items: [
+        {
+          name: 'Classic Burger',
+          description: 'Beef patty, lettuce, tomato, onion, pickles, special sauce',
+          price: 12.00,
+          order: 1,
+          imageUrl: '/images/classic-burger.jpg',
+        },
+        {
+          name: 'Cheeseburger',
+          description: 'Beef patty, cheese, lettuce, tomato, onion, pickles',
+          price: 13.00,
+          order: 2,
+          imageUrl: '/images/cheeseburger.jpg',
+        },
+        {
+          name: 'Bacon Burger',
+          description: 'Beef patty, crispy bacon, cheese, lettuce, tomato, onion',
+          price: 14.50,
+          order: 3,
+          imageUrl: '/images/bacon-burger.jpg',
+        },
+        {
+          name: 'BBQ Burger',
+          description: 'Beef patty, BBQ sauce, crispy onions, cheddar cheese',
+          price: 14.00,
+          order: 4,
+          imageUrl: '/images/bbq-burger.jpg',
+        },
+        {
+          name: 'Veggie Burger',
+          description: 'Plant-based patty, lettuce, tomato, onion, special sauce',
+          price: 11.00,
+          order: 5,
+          imageUrl: '/images/veggie-burger.jpg',
+        },
+      ],
     },
-    // Coffees
     {
-      name: 'Espresso',
-      description: 'Strong, concentrated coffee shot',
-      price: 3.50,
+      name: 'Snacks & Sides',
       order: 3,
+      items: [
+        {
+          name: 'French Fries',
+          description: 'Crispy golden fries with sea salt',
+          price: 4.50,
+          order: 1,
+          imageUrl: '/images/french-fries.jpg',
+        },
+        {
+          name: 'Onion Rings',
+          description: 'Beer-battered onion rings, crispy and golden',
+          price: 5.00,
+          order: 2,
+          imageUrl: '/images/onion-rings.jpg',
+        },
+        {
+          name: 'Mozzarella Sticks',
+          description: 'Breaded mozzarella with marinara sauce',
+          price: 6.50,
+          order: 3,
+          imageUrl: '/images/mozzarella-sticks.jpg',
+        },
+        {
+          name: 'Chicken Wings',
+          description: 'Spicy buffalo wings with blue cheese dip',
+          price: 8.00,
+          order: 4,
+          imageUrl: '/images/chicken-wings.jpg',
+        },
+        {
+          name: 'Nachos',
+          description: 'Tortilla chips with cheese, jalapeños, and sour cream',
+          price: 7.50,
+          order: 5,
+          imageUrl: '/images/nachos.jpg',
+        },
+        {
+          name: 'Loaded Fries',
+          description: 'French fries topped with cheese, bacon, and sour cream',
+          price: 7.00,
+          order: 6,
+          imageUrl: '/images/loaded-fries.jpg',
+        },
+      ],
     },
     {
-      name: 'Americano',
-      description: 'Espresso with hot water',
-      price: 4.00,
+      name: 'Salads',
       order: 4,
+      items: [
+        {
+          name: 'Caesar Salad',
+          description: 'Romaine lettuce, parmesan, croutons, caesar dressing',
+          price: 9.00,
+          order: 1,
+          imageUrl: '/images/caesar-salad.jpg',
+        },
+        {
+          name: 'Garden Salad',
+          description: 'Mixed greens, tomatoes, cucumbers, carrots, vinaigrette',
+          price: 8.00,
+          order: 2,
+          imageUrl: '/images/garden-salad.jpg',
+        },
+        {
+          name: 'Greek Salad',
+          description: 'Mixed greens, feta cheese, olives, tomatoes, cucumbers, olive oil',
+          price: 10.00,
+          order: 3,
+          imageUrl: '/images/greek-salad.jpg',
+        },
+        {
+          name: 'Chicken Salad',
+          description: 'Mixed greens, grilled chicken, tomatoes, cucumbers, ranch dressing',
+          price: 11.00,
+          order: 4,
+          imageUrl: '/images/chicken-salad.jpg',
+        },
+        {
+          name: 'Cobb Salad',
+          description: 'Mixed greens, grilled chicken, bacon, eggs, avocado, blue cheese',
+          price: 12.00,
+          order: 5,
+          imageUrl: '/images/cobb-salad.jpg',
+        },
+      ],
     },
     {
-      name: 'Cappuccino',
-      description: 'Espresso with steamed milk and foam',
-      price: 4.50,
+      name: 'Drinks',
       order: 5,
-    },
-    {
-      name: 'Latte',
-      description: 'Espresso with steamed milk',
-      price: 4.75,
-      order: 6,
-    },
-    {
-      name: 'Mocha',
-      description: 'Espresso with chocolate and steamed milk',
-      price: 5.25,
-      order: 7,
-    },
-    {
-      name: 'Macchiato',
-      description: 'Espresso with a dollop of foam',
-      price: 4.25,
-      order: 8,
-    },
-    {
-      name: 'Cold Brew',
-      description: 'Smooth, cold-brewed coffee',
-      price: 4.50,
-      order: 9,
-    },
-    {
-      name: 'Iced Coffee',
-      description: 'Chilled coffee over ice',
-      price: 4.00,
-      order: 10,
-    },
-    // Sodas
-    {
-      name: 'Cola',
-      description: 'Classic cola soft drink',
-      price: 3.00,
-      order: 11,
-    },
-    {
-      name: 'Lemon-Lime Soda',
-      description: 'Refreshing citrus-flavored soda',
-      price: 3.00,
-      order: 12,
-    },
-    {
-      name: 'Orange Soda',
-      description: 'Fruity orange-flavored soda',
-      price: 3.00,
-      order: 13,
-    },
-    {
-      name: 'Root Beer',
-      description: 'Classic root beer flavor',
-      price: 3.25,
-      order: 14,
-    },
-    {
-      name: 'Ginger Ale',
-      description: 'Crisp ginger-flavored soda',
-      price: 3.25,
-      order: 15,
+      items: [
+        {
+          name: 'Cola',
+          description: 'Classic cola soft drink',
+          price: 3.00,
+          order: 1,
+          imageUrl: '/images/cola.jpg',
+        },
+        {
+          name: 'Lemon-Lime Soda',
+          description: 'Refreshing citrus-flavored soda',
+          price: 3.00,
+          order: 2,
+          imageUrl: '/images/lemon-lime-soda.jpg',
+        },
+        {
+          name: 'Orange Soda',
+          description: 'Fruity orange-flavored soda',
+          price: 3.00,
+          order: 3,
+          imageUrl: '/images/orange-soda.jpg',
+        },
+        {
+          name: 'Root Beer',
+          description: 'Classic root beer flavor',
+          price: 3.25,
+          order: 4,
+          imageUrl: '/images/root-beer.jpg',
+        },
+        {
+          name: 'Iced Tea',
+          description: 'Refreshing iced tea, sweetened or unsweetened',
+          price: 2.75,
+          order: 5,
+          imageUrl: '/images/iced-tea.jpg',
+        },
+        {
+          name: 'Lemonade',
+          description: 'Fresh squeezed lemonade',
+          price: 3.50,
+          order: 6,
+          imageUrl: '/images/lemonade.jpg',
+        },
+        {
+          name: 'Water',
+          description: 'Bottled water',
+          price: 2.00,
+          order: 7,
+          imageUrl: '/images/water.jpg',
+        },
+      ],
     },
   ]
 
-  // GLB file path - place your GLB file in public/models/
-  // Example: public/models/towels_reality_scan_test.glb
-  // The arModelUrl should be the path to your GLB file
-  const glbFilePath = '/models/towels_reality_scan_test.glb'
-
-  for (const item of menuItems) {
-    await prisma.menuItem.create({
-      data: {
-        ...item,
-        categoryId: drinksCategory.id,
+  // Create categories and menu items
+  for (const categoryData of categoriesData) {
+    let category = await prisma.category.findFirst({
+      where: {
         restaurantId: restaurant.id,
-        imageUrl: null,
-        arModelUrl: glbFilePath, // All items use the same 3D model for testing
+        name: categoryData.name,
       },
     })
-    console.log(`✅ Created menu item: ${item.name}`)
+
+    if (!category) {
+      category = await prisma.category.create({
+        data: {
+          name: categoryData.name,
+          restaurantId: restaurant.id,
+          order: categoryData.order,
+        },
+      })
+      console.log(`✅ Created category: ${categoryData.name}`)
+    } else {
+      console.log(`✅ Using existing category: ${categoryData.name}`)
+      // Delete existing menu items in this category to avoid duplicates
+      const deletedCount = await prisma.menuItem.deleteMany({
+        where: {
+          categoryId: category.id,
+        },
+      })
+      if (deletedCount.count > 0) {
+        console.log(`   🗑️  Deleted ${deletedCount.count} existing menu items`)
+      }
+    }
+
+    // Create menu items for this category
+    for (const item of categoryData.items) {
+      await prisma.menuItem.create({
+        data: {
+          ...item,
+          categoryId: category.id,
+          restaurantId: restaurant.id,
+          imageUrl: item.imageUrl || null,
+          arModelUrl: item.arModelUrl || defaultGlbFilePath,
+        },
+      })
+      console.log(`   ✅ Created menu item: ${item.name}`)
+    }
   }
 
+  const totalItems = categoriesData.reduce((sum, cat) => sum + cat.items.length, 0)
   console.log('\n🎉 Seed completed successfully!')
-  console.log(`📊 Created ${menuItems.length} menu items in the Drinks category`)
+  console.log(`📊 Created ${categoriesData.length} categories with ${totalItems} total menu items`)
 }
 
 main()
