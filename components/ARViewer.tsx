@@ -157,21 +157,21 @@ export default function ARViewer({ modelUrl, onClose }: ARViewerProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="relative w-full h-full max-w-6xl max-h-[90vh] m-4"
+        className="relative w-full h-full max-w-5xl max-h-[90vh] m-4 rounded-lg overflow-hidden shadow-xl bg-white animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 bg-white hover:bg-gray-100 text-shadow rounded-full p-2 shadow-lg transition-colors"
+          className="absolute top-3 right-3 z-20 bg-white hover:bg-gray-50 text-gray-700 rounded-full p-2 shadow-md transition-colors"
           aria-label="Close AR viewer"
         >
           <svg
-            className="w-6 h-6"
+            className="w-5 h-5"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -179,7 +179,7 @@ export default function ARViewer({ modelUrl, onClose }: ARViewerProps) {
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth={2}
+              strokeWidth={2.5}
               d="M6 18L18 6M6 6l12 12"
             />
           </svg>
@@ -213,20 +213,19 @@ export default function ARViewer({ modelUrl, onClose }: ARViewerProps) {
           {(isLoading || error) && (
             <div
               slot="poster"
-              className="w-full h-full flex items-center justify-center bg-gray-100"
+              className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100"
             >
-              <div className="text-center">
+              <div className="text-center px-6">
                 {error ? (
-                  <>
-                    <div className="text-red-500 text-4xl mb-4">⚠️</div>
-                    <p className="text-red-600 font-semibold mb-2">Error Loading Model</p>
-                    <p className="text-gray-600 text-sm mb-4">{error}</p>
-                    <p className="text-gray-500 text-xs">Path: {modelUrlFinal}</p>
-                  </>
+                  <div className="animate-in fade-in zoom-in-95 duration-300">
+                    <p className="text-red-600 font-semibold text-base mb-2">Error Loading Model</p>
+                    <p className="text-gray-600 text-sm mb-4 max-w-md">{error}</p>
+                    <p className="text-gray-500 text-xs font-mono bg-gray-100 px-2 py-1 rounded">Path: {modelUrlFinal}</p>
+                  </div>
                 ) : (
-                  <>
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                    <p className="text-gray-600 font-medium mb-2">Loading 3D model...</p>
+                  <div className="animate-in fade-in duration-300">
+                    <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary/30 border-t-primary mx-auto mb-4"></div>
+                    <p className="text-gray-700 font-medium mb-3">Loading 3D model...</p>
                     {loadProgress > 0 && (
                       <div className="w-48 bg-gray-200 rounded-full h-2 mx-auto mb-2">
                         <div
@@ -237,9 +236,9 @@ export default function ARViewer({ modelUrl, onClose }: ARViewerProps) {
                     )}
                     <p className="text-gray-500 text-xs">{loadProgress}%</p>
                     {loadProgress === 0 && (
-                      <p className="text-gray-400 text-xs mt-2">This may take a moment for large files...</p>
+                      <p className="text-gray-400 text-xs mt-2">This may take a moment...</p>
                     )}
-                  </>
+                  </div>
                 )}
               </div>
             </div>
@@ -247,7 +246,7 @@ export default function ARViewer({ modelUrl, onClose }: ARViewerProps) {
         </model-viewer>
 
         {/* AR Button Info */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg text-sm">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-900/80 backdrop-blur-sm text-white px-4 py-2 rounded text-xs font-medium">
           <p>Tap the AR button to view in your space</p>
         </div>
       </div>
