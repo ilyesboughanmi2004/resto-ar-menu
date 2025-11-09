@@ -320,11 +320,14 @@ async function main() {
     for (const item of categoryData.items) {
       await prisma.menuItem.create({
         data: {
-          ...item,
+          name: item.name,
+          description: item.description,
+          price: item.price,
+          order: item.order,
           categoryId: category.id,
           restaurantId: restaurant.id,
           imageUrl: item.imageUrl || null,
-          arModelUrl: item.arModelUrl || defaultGlbFilePath,
+          arModelUrl: (item as any).arModelUrl || defaultGlbFilePath,
         },
       })
       console.log(`   ✅ Created menu item: ${item.name}`)
